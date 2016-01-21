@@ -24,6 +24,7 @@
 package com.helion3.keys;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,7 @@ public class Keys {
         parentDirectory = defaultConfig.getParentFile();
 
         // Configuration
+        config = new Configuration(defaultConfig, configManager);
         loadConfig();
 
         // Storage
@@ -99,9 +101,7 @@ public class Keys {
     /**
      * Load the configuration file.
      */
-    private void loadConfig() {
-        config = new Configuration(defaultConfig, configManager);
-
+    private static void loadConfig() {
         // Lockable Blocks
         ImmutableList.Builder<BlockType> lockableBlockBuilder = ImmutableList.builder();
         List<String> blockIds = config.getNode("lockable", "blocks").getList(Types::asString);
@@ -127,6 +127,15 @@ public class Keys {
             }
         }
         autolockedBlocks = autolockBlockBuilder.build();
+    }
+
+    public static void reload() {
+        try {
+            config.reload();
+            loadConfig();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
    /**

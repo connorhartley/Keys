@@ -1,5 +1,5 @@
 /**
- * This file is part of Keys, licensed under the MIT License (MIT).
+ * This file is part of SafeGuard, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2016 Helion3 http://helion3.com/
  *
@@ -23,9 +23,6 @@
  */
 package com.helion3.keys.commands;
 
-import java.util.List;
-
-import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -33,37 +30,23 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.helion3.keys.util.Format;
+import com.helion3.keys.Keys;
 
-public class KeysCommands {
-    private KeysCommands() {}
+public class ReloadCommand {
+    private ReloadCommand() {}
 
-    /**
-     * Build a complete command hierarchy
-     * @return
-     */
     public static CommandSpec getCommand() {
-        ImmutableMap.Builder<List<String>, CommandCallable> builder = ImmutableMap.builder();
-        builder.put(ImmutableList.of("add"), AddKeyCommand.getCommand());
-        builder.put(ImmutableList.of("remove", "del", "delete"), RemoveKeyCommand.getCommand());
-        builder.put(ImmutableList.of("reload"), ReloadCommand.getCommand());
-
         return CommandSpec.builder()
-            .permission("keys.use")
-            .executor(new CommandExecutor() {
-                @Override
-                public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-                    src.sendMessage(Text.of(
-                        Format.heading(TextColors.GRAY, "By ", TextColors.GOLD, "viveleroi.\n"),
-                        TextColors.GRAY, "IRC: ", TextColors.WHITE, "irc.esper.net #helion3\n"
-                    ));
-                    return CommandResult.empty();
-                }
-            })
-            .children(builder.build()).build();
+        .description(Text.of("Reload config and zone files."))
+        .permission("keys.mod")
+        .executor(new CommandExecutor() {
+            @Override
+            public CommandResult execute(CommandSource source, CommandContext args) throws CommandException {
+                Keys.reload();
+
+                return CommandResult.success();
+            }
+        }).build();
     }
 }

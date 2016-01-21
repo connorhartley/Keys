@@ -36,6 +36,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 public class Configuration {
+    private final ConfigurationLoader<CommentedConfigurationNode> configManager;
     private ConfigurationNode rootNode = null;
 
     /**
@@ -44,6 +45,8 @@ public class Configuration {
      * @param configManager
      */
     public Configuration(File defaultConfig, ConfigurationLoader<CommentedConfigurationNode> configManager) {
+        this.configManager = configManager;
+
         try {
             // If file does not exist, we must create it
             if (!defaultConfig.exists()) {
@@ -122,5 +125,9 @@ public class Configuration {
      */
     public ConfigurationNode getNode(Object... path) {
         return rootNode.getNode(path);
+    }
+
+    public void reload() throws IOException {
+        rootNode = configManager.load();
     }
 }

@@ -51,7 +51,7 @@ public class InteractBlockListener {
         Player player = optionalPlayer.get();
 
         try {
-            if (!Keys.getStorageAdapter().allowsAccess(player, event.getTargetBlock().getLocation().get())) {
+            if (!player.hasPermission("keys.mod") && !Keys.getStorageAdapter().allowsAccess(player, event.getTargetBlock().getLocation().get())) {
                 player.sendMessage(Format.error("You may not access this locked location."));
                 event.setCancelled(true);
             }

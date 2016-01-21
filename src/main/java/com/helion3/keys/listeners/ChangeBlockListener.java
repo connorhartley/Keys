@@ -27,11 +27,13 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.helion3.keys.Keys;
 import com.helion3.keys.util.Format;
 
@@ -49,9 +51,21 @@ public class ChangeBlockListener {
         if (event instanceof ChangeBlockEvent.Place && player.hasPermission("keys.use")) {
             for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
                 if (Keys.getAutoLockedBlocks().contains(transaction.getFinal().getState().getType())) {
+                    // Skip "place" events that are really just "state change" events
+                    if (transaction.getOriginal().getState().getType().equals(BlockTypes.LIT_FURNACE)) {
+                        continue;
+                    }
+
                     try {
                         Keys.getStorageAdapter().setLock(player, transaction.getFinal().getLocation().get());
-                        player.sendMessage(Format.heading("Successfully locked!"));
+
+                        // Build message
+                        String blockName = transaction.getFinal().getState().getType().getName().replace("minecraft:", "").replace("_", " ");
+                        Vector3i position = transaction.getFinal().getLocation().get().getPosition().toInt();
+                        String message = String.format("Auto-locking %s at %d %d %d", blockName, position.getX(), position.getY(), position.getZ());
+
+                        // Send message
+                        player.sendMessage(Format.success(message));
                     } catch (SQLException e) {
                         player.sendMessage(Format.error("Storage error. Details have been logged."));
                         e.printStackTrace();
@@ -69,7 +83,13 @@ public class ChangeBlockListener {
                         if (player.hasPermission("keys.mod") || Keys.getStorageAdapter().ownsLock(player, transaction.getOriginal().getLocation().get())) {
                             // Remove locks
                             Keys.getStorageAdapter().removeLocks(transaction.getOriginal().getLocation().get());
-                            player.sendMessage(Format.heading("Removed locks for this location."));
+
+                            // Build message
+                            String blockName = transaction.getOriginal().getState().getType().getName().replace("minecraft:", "").replace("_", " ");
+                            Vector3i position = transaction.getOriginal().getLocation().get().getPosition().toInt();
+                            String message = String.format("Removed %s locks and keys at %d %d %d", blockName, position.getX(), position.getY(), position.getZ());
+
+                            player.sendMessage(Format.heading(message));
                         } else {
                             transaction.setValid(false);
                             player.sendMessage(Format.error("You may not destroy this locked location."));
