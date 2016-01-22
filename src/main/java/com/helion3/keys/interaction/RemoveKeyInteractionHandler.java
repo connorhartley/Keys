@@ -46,9 +46,8 @@ public class RemoveKeyInteractionHandler implements InteractionHandler {
                 player.sendMessage(Format.error("This block isn't locked."));
             } else {
                 if (player.hasPermission("keys.mod") || Keys.getStorageAdapter().ownsLock(player, location)) {
-                    // Add a key
-                    Keys.getStorageAdapter().addKey(recipient, location);
-                    player.sendMessage(Format.success(String.format("Key added for %s", recipient.getName())));
+                    Keys.getStorageAdapter().removeLock(recipient, location);
+                    player.sendMessage(Format.success(String.format("Destroyed key for %s", recipient.getName())));
                 } else {
                     player.sendMessage(Format.error("Cannot unlock, you do not own this lock."));
                 }

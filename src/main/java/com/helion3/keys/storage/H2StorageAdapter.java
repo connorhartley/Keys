@@ -205,6 +205,30 @@ public class H2StorageAdapter implements StorageAdapter {
     }
 
     @Override
+    public void removeLock(Player player, Location<World> location) throws SQLException {
+        Connection conn = getConnection();
+        PreparedStatement statement = null;
+
+        try {
+            String sql = "DELETE FROM locks WHERE user = ? AND world = ? AND x = ? AND y = ? AND z = ?";
+            statement = conn.prepareStatement(sql);
+            statement.setObject(1, player.getUniqueId());
+            statement.setObject(2, location.getExtent().getUniqueId());
+            statement.setInt(3, location.getBlockX());
+            statement.setInt(4, location.getBlockY());
+            statement.setInt(5, location.getBlockZ());
+            statement.executeUpdate();
+        }
+        finally {
+            if (statement != null) {
+                statement.close();
+            }
+
+            conn.close();
+        }
+    }
+
+    @Override
     public void removeLocks(Location<World> location) throws SQLException {
         Connection conn = getConnection();
         PreparedStatement statement = null;
