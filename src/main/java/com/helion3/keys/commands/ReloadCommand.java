@@ -1,5 +1,5 @@
 /**
- * This file is part of SafeGuard, licensed under the MIT License (MIT).
+ * This file is part of Keys, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2016 Helion3 http://helion3.com/
  *

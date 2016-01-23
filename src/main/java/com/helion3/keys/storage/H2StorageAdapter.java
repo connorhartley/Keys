@@ -229,7 +229,8 @@ public class H2StorageAdapter implements StorageAdapter {
     }
 
     @Override
-    public void removeLocks(Location<World> location) throws SQLException {
+    public boolean removeLocks(Location<World> location) throws SQLException {
+        boolean locksRemoved = false;
         Connection conn = getConnection();
         PreparedStatement statement = null;
 
@@ -240,7 +241,9 @@ public class H2StorageAdapter implements StorageAdapter {
             statement.setInt(2, location.getBlockX());
             statement.setInt(3, location.getBlockY());
             statement.setInt(4, location.getBlockZ());
-            statement.executeUpdate();
+            int results = statement.executeUpdate();
+
+            locksRemoved = (results > 0);
         }
         finally {
             if (statement != null) {
@@ -249,6 +252,8 @@ public class H2StorageAdapter implements StorageAdapter {
 
             conn.close();
         }
+
+        return locksRemoved;
     }
 
     @Override

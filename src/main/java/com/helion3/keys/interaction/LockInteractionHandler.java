@@ -36,6 +36,11 @@ public class LockInteractionHandler implements InteractionHandler {
     @Override
     public void handle(Player player, Location<World> location) {
         try {
+            if (!Keys.getLockableBlocks().contains(location.getBlock().getType())) {
+                player.sendMessage(Format.error("You may not lock a block of this type."));
+                return;
+            }
+
             if (!Keys.getStorageAdapter().getLocks(location).isEmpty()) {
                 player.sendMessage(Format.error("This block is already locked."));
             } else {

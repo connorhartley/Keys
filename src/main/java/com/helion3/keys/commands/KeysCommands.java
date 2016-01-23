@@ -51,6 +51,7 @@ public class KeysCommands {
         builder.put(ImmutableList.of("add"), AddKeyCommand.getCommand());
         builder.put(ImmutableList.of("remove", "del", "delete"), RemoveKeyCommand.getCommand());
         builder.put(ImmutableList.of("reload"), ReloadCommand.getCommand());
+        builder.put(ImmutableList.of("?", "help"), HelpCommand.getCommand());
 
         return CommandSpec.builder()
             .permission("keys.use")

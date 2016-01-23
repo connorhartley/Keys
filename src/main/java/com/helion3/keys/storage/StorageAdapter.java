@@ -78,15 +78,16 @@ public interface StorageAdapter {
      * @param location Location of lock.
      * @throws SQLException
      */
-    public void removeLock(Player player, Location<World> location) throws SQLException;
+    void removeLock(Player player, Location<World> location) throws SQLException;
 
     /**
      * Remove all locks to a given location.
      *
      * @param location Location of locks
+     * @return Whether locks were removed
      * @throws SQLException
      */
-    void removeLocks(Location<World> location) throws SQLException;
+    boolean removeLocks(Location<World> location) throws SQLException;
 
     /**
      * Set a lock for the given location, with player as original owner.

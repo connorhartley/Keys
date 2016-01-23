@@ -82,14 +82,14 @@ public class ChangeBlockListener {
                         // Is user allowed here?
                         if (player.hasPermission("keys.mod") || Keys.getStorageAdapter().ownsLock(player, transaction.getOriginal().getLocation().get())) {
                             // Remove locks
-                            Keys.getStorageAdapter().removeLocks(transaction.getOriginal().getLocation().get());
+                            if (Keys.getStorageAdapter().removeLocks(transaction.getOriginal().getLocation().get())) {
+                                // Build message
+                                String blockName = transaction.getOriginal().getState().getType().getName().replace("minecraft:", "").replace("_", " ");
+                                Vector3i position = transaction.getOriginal().getLocation().get().getPosition().toInt();
+                                String message = String.format("Removed %s locks and keys at %d %d %d", blockName, position.getX(), position.getY(), position.getZ());
 
-                            // Build message
-                            String blockName = transaction.getOriginal().getState().getType().getName().replace("minecraft:", "").replace("_", " ");
-                            Vector3i position = transaction.getOriginal().getLocation().get().getPosition().toInt();
-                            String message = String.format("Removed %s locks and keys at %d %d %d", blockName, position.getX(), position.getY(), position.getZ());
-
-                            player.sendMessage(Format.heading(message));
+                                player.sendMessage(Format.heading(message));
+                            }
                         } else {
                             transaction.setValid(false);
                             player.sendMessage(Format.error("You may not destroy this locked location."));
