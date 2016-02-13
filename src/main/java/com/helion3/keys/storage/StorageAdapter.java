@@ -62,6 +62,15 @@ public interface StorageAdapter {
     List<Lock> getLocks(Location<World> location) throws SQLException;
 
     /**
+     * List all master locks for a given location.
+     *
+     * @param location
+     * @return
+     * @throws SQLException
+     */
+    List<Lock> getMasterLocks(Location<World> location) throws SQLException;
+
+    /**
      * Whether a player owns the lock on this location.
      *
      * @param player

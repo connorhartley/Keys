@@ -171,23 +171,31 @@ public class H2StorageAdapter implements StorageAdapter {
     }
 
     @Override
-    public boolean ownsLock(Player player, Location<World> location) throws SQLException {
-        boolean ownsLock = false;
+    public List<Lock> getMasterLocks(Location<World> location) throws SQLException {
+        List<Lock> locks = new ArrayList<Lock>();
         Connection conn = getConnection();
         PreparedStatement statement = null;
         ResultSet resultSet = null;
 
         try {
-            String sql = "SELECT * FROM locks WHERE user = ? AND world = ? AND x = ? AND y = ? AND z = ? AND master = ?";
+            String sql = "SELECT * FROM locks WHERE world = ? AND x = ? AND y = ? AND z = ? AND master = ?";
             statement = conn.prepareStatement(sql);
-            statement.setObject(1, player.getUniqueId());
-            statement.setObject(2, location.getExtent().getUniqueId());
-            statement.setInt(3, location.getBlockX());
-            statement.setInt(4, location.getBlockY());
-            statement.setInt(5, location.getBlockZ());
-            statement.setBoolean(6, true);
+            statement.setObject(1, location.getExtent().getUniqueId());
+            statement.setInt(2, location.getBlockX());
+            statement.setInt(3, location.getBlockY());
+            statement.setInt(4, location.getBlockZ());
+            statement.setBoolean(5, true);
             resultSet = statement.executeQuery();
-            ownsLock = resultSet.next();
+
+            while (resultSet.next()) {
+                UUID userUuid = null;
+
+                if (resultSet.getObject("user") instanceof UUID) {
+                    userUuid = (UUID) resultSet.getObject("user");
+                }
+
+                locks.add(new Lock(userUuid, location));
+            }
         }
         finally {
             if (resultSet != null) {
@@ -199,6 +207,21 @@ public class H2StorageAdapter implements StorageAdapter {
             }
 
             conn.close();
+        }
+
+        return locks;
+    }
+
+    @Override
+    public boolean ownsLock(Player player, Location<World> location) throws SQLException {
+        List<Lock> locks = getMasterLocks(location);
+        boolean ownsLock = locks.isEmpty();
+
+        for (Lock lock : getMasterLocks(location)) {
+            if (lock.getUserId().equals(player.getUniqueId())) {
+                ownsLock = true;
+                break;
+            }
         }
 
         return ownsLock;
