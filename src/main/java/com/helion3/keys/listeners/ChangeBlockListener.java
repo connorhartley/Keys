@@ -36,6 +36,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import com.flowpowered.math.vector.Vector3i;
 import com.helion3.keys.Keys;
 import com.helion3.keys.util.Format;
+import org.spongepowered.api.util.Direction;
 
 public class ChangeBlockListener {
     @Listener
@@ -77,29 +78,41 @@ public class ChangeBlockListener {
         // Are they breaking a locked item?
         if (event instanceof ChangeBlockEvent.Break) {
             for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
-                if (Keys.getLockableBlocks().contains(transaction.getOriginal().getState().getType())) {
-                    try {
-                        // Is user allowed here?
-                        if (player.hasPermission("keys.mod") || Keys.getStorageAdapter().ownsLock(player, transaction.getOriginal().getLocation().get())) {
-                            // Remove locks
-                            if (Keys.getStorageAdapter().removeLocks(transaction.getOriginal().getLocation().get())) {
-                                // Build message
-                                String blockName = transaction.getOriginal().getState().getType().getName().replace("minecraft:", "").replace("_", " ");
-                                Vector3i position = transaction.getOriginal().getLocation().get().getPosition().toInt();
-                                String message = String.format("Removed %s locks and keys at %d %d %d", blockName, position.getX(), position.getY(), position.getZ());
-
-                                player.sendMessage(Format.heading(message));
-                            }
-                        } else {
-                            transaction.setValid(false);
-                            player.sendMessage(Format.error("You may not destroy this locked location."));
-                        }
-                    } catch (SQLException e) {
-                        player.sendMessage(Format.error("Storage error. Details have been logged."));
-                        e.printStackTrace();
-                    }
+                // Block
+                if (!handleBreak(player, transaction, transaction.getOriginal())) {
+                    // Block above
+                    handleBreak(player, transaction, transaction.getOriginal().getLocation().get().getRelative(Direction.UP).createSnapshot());
                 }
             }
         }
+    }
+
+    private boolean handleBreak(Player player, Transaction<BlockSnapshot> transaction, BlockSnapshot block) {
+        if (Keys.getLockableBlocks().contains(block.getState().getType())) {
+            try {
+                // Is user allowed here?
+                if (player.hasPermission("keys.mod") || Keys.getStorageAdapter().ownsLock(player, block.getLocation().get())) {
+                    // Remove locks
+                    if (Keys.getStorageAdapter().removeLocks(block.getLocation().get())) {
+                        // Build message
+                        String blockName = block.getState().getType().getName().replace("minecraft:", "").replace("_", " ");
+                        Vector3i position = block.getLocation().get().getPosition().toInt();
+                        String message = String.format("Removed %s locks and keys at %d %d %d", blockName, position.getX(), position.getY(), position.getZ());
+
+                        player.sendMessage(Format.heading(message));
+                    }
+                } else {
+                    transaction.setValid(false);
+                    player.sendMessage(Format.error("You may not destroy this locked location."));
+                }
+
+                return true;
+            } catch (SQLException e) {
+                player.sendMessage(Format.error("Storage error. Details have been logged."));
+                e.printStackTrace();
+            }
+        }
+
+        return false;
     }
 }
