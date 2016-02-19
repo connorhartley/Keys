@@ -37,12 +37,7 @@ import com.helion3.keys.util.Format;
 
 public class InteractBlockListener {
     @Listener
-    public void onOpenInventory(final InteractBlockEvent.Secondary event) {
-        Optional<TileEntity> entity = event.getTargetBlock().getLocation().get().getTileEntity();
-        if (!entity.isPresent()) {
-            return;
-        }
-
+    public void onUse(final InteractBlockEvent.Secondary event) {
         Optional<Player> optionalPlayer = event.getCause().first(Player.class);
         if (!optionalPlayer.isPresent()) {
             return;
@@ -52,7 +47,7 @@ public class InteractBlockListener {
 
         try {
             if (!player.hasPermission("keys.mod") && !Keys.getStorageAdapter().allowsAccess(player, event.getTargetBlock().getLocation().get())) {
-                player.sendMessage(Format.error("You may not access this locked location."));
+                player.sendMessage(Format.error("You may not interact with this locked location."));
                 event.setCancelled(true);
             }
         } catch (SQLException e) {
