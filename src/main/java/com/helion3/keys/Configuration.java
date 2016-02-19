@@ -83,6 +83,7 @@ public class Configuration {
             lockableblocks.add(BlockTypes.JUNGLE_FENCE_GATE.getId());
             lockableblocks.add(BlockTypes.LEVER.getId());
             lockableblocks.add(BlockTypes.LIGHT_WEIGHTED_PRESSURE_PLATE.getId());
+            lockableblocks.add(BlockTypes.LIT_FURNACE.getId());
             lockableblocks.add(BlockTypes.SPRUCE_DOOR.getId());
             lockableblocks.add(BlockTypes.SPRUCE_FENCE_GATE.getId());
             lockableblocks.add(BlockTypes.STANDING_SIGN.getId());
