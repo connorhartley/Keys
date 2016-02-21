@@ -24,8 +24,12 @@
 package com.helion3.keys.interaction;
 
 import java.sql.SQLException;
+import java.util.Optional;
 
+import com.helion3.keys.util.WorldUtil;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -40,8 +44,16 @@ public class UnlockInteractionHandler implements InteractionHandler {
                 player.sendMessage(Format.error("This block isn't locked."));
             } else {
                 if (player.hasPermission("keys.mod") || Keys.getStorageAdapter().ownsLock(player, location)) {
+                    // Unlock this block
                     Keys.getStorageAdapter().removeLocks(location);
                     player.sendMessage(Format.success("Unlocked!"));
+
+                    // Unlock partner
+                    Optional<Location<World>> partner = WorldUtil.findPartnerBlock(location);
+                    if (partner.isPresent()) {
+                        player.sendMessage(Text.of(TextColors.GRAY, "Unlocking partner location too..."));
+                        Keys.getStorageAdapter().removeLocks(partner.get());
+                    }
                 } else {
                     player.sendMessage(Format.error("Cannot unlock, you do not own this lock."));
                 }

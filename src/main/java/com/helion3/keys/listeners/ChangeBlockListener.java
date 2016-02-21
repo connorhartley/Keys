@@ -79,21 +79,21 @@ public class ChangeBlockListener {
         if (event instanceof ChangeBlockEvent.Break) {
             for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
                 // Block
-                if (!handleBreak(player, transaction, transaction.getOriginal())) {
+                if (!handleBreak(player, transaction, transaction.getOriginal(), true)) {
                     // Block above
-                    handleBreak(player, transaction, transaction.getOriginal().getLocation().get().getRelative(Direction.UP).createSnapshot());
+                    handleBreak(player, transaction, transaction.getOriginal().getLocation().get().getRelative(Direction.UP).createSnapshot(), false);
                 }
             }
         }
     }
 
-    private boolean handleBreak(Player player, Transaction<BlockSnapshot> transaction, BlockSnapshot block) {
+    private boolean handleBreak(Player player, Transaction<BlockSnapshot> transaction, BlockSnapshot block, boolean autoUnlock) {
         if (Keys.getLockableBlocks().contains(block.getState().getType())) {
             try {
                 // Is user allowed here?
                 if (player.hasPermission("keys.mod") || Keys.getStorageAdapter().ownsLock(player, block.getLocation().get())) {
                     // Remove locks
-                    if (Keys.getStorageAdapter().removeLocks(block.getLocation().get())) {
+                    if (autoUnlock && Keys.getStorageAdapter().removeLocks(block.getLocation().get())) {
                         // Build message
                         String blockName = block.getState().getType().getName().replace("minecraft:", "").replace("_", " ");
                         Vector3i position = block.getLocation().get().getPosition().toInt();

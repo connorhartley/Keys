@@ -24,8 +24,12 @@
 package com.helion3.keys.interaction;
 
 import java.sql.SQLException;
+import java.util.Optional;
 
+import com.helion3.keys.util.WorldUtil;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -48,6 +52,13 @@ public class RemoveKeyInteractionHandler implements InteractionHandler {
                 if (player.hasPermission("keys.mod") || Keys.getStorageAdapter().ownsLock(player, location)) {
                     Keys.getStorageAdapter().removeLock(recipient, location);
                     player.sendMessage(Format.success(String.format("Destroyed key for %s", recipient.getName())));
+
+                    // Add a key to partner
+                    Optional<Location<World>> partner = WorldUtil.findPartnerBlock(location);
+                    if (partner.isPresent()) {
+                        player.sendMessage(Text.of(TextColors.GRAY, "Keying partner location too..."));
+                        Keys.getStorageAdapter().removeLock(recipient, partner.get());
+                    }
                 } else {
                     player.sendMessage(Format.error("Cannot unlock, you do not own this lock."));
                 }
