@@ -55,7 +55,7 @@ import ninja.leaping.configurate.Types;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
-@Plugin(id = "Keys", name = "Keys", version = "1.0")
+@Plugin(id = "keys", name = "keys", version = "1.2")
 public class Keys {
     private static ImmutableList<BlockType> autolockedBlocks;
     private static Configuration config;
