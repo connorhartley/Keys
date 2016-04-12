@@ -24,8 +24,12 @@
 package com.helion3.keys.listeners;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
+import com.helion3.keys.locks.Lock;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -34,22 +38,22 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import com.helion3.keys.Keys;
 import com.helion3.keys.interaction.InteractionHandler;
 import com.helion3.keys.util.Format;
+import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 public class InteractBlockListener {
     @Listener
-    public void onUse(final InteractBlockEvent.Secondary event) {
-        Optional<Player> optionalPlayer = event.getCause().first(Player.class);
-        if (!optionalPlayer.isPresent()) {
-            return;
-        }
-
-        Player player = optionalPlayer.get();
-
+    public void onUse(final InteractBlockEvent.Secondary event, @First Player player) {
         try {
             if (!player.hasPermission("keys.mod") && !Keys.getStorageAdapter().allowsAccess(player, event.getTargetBlock().getLocation().get())) {
                 player.sendMessage(Format.error("You may not interact with this locked location."));
                 event.setCancelled(true);
             }
+
+            listLockOwner(player, event.getTargetBlock().getLocation().get());
         } catch (SQLException e) {
             player.sendMessage(Format.error("Storage error. Details have been logged."));
             e.printStackTrace();
@@ -57,13 +61,7 @@ public class InteractBlockListener {
     }
 
     @Listener
-    public void onPunchBlock(final InteractBlockEvent.Primary event) {
-        Optional<Player> optionalPlayer = event.getCause().first(Player.class);
-        if (!optionalPlayer.isPresent()) {
-            return;
-        }
-
-        Player player = optionalPlayer.get();
+    public void onPunchBlock(final InteractBlockEvent.Primary event, @First Player player) {
         Optional<InteractionHandler> optional = Keys.getInteractionHandler(player);
         if (!optional.isPresent()) {
             return;
@@ -72,5 +70,22 @@ public class InteractBlockListener {
         optional.get().handle(player, event.getTargetBlock().getLocation().get());
 
         Keys.removeInteractionHandler(player);
+    }
+
+    protected void listLockOwner(Player player, Location<World> location) throws SQLException {
+        if (player.hasPermission("keys.mod")) {
+            List<Lock> masters = Keys.getStorageAdapter().getMasterLocks(location);
+
+            for (Lock master : masters) {
+                if (master.getUserId().equals(player.getUniqueId())) {
+                    continue;
+                }
+
+                CompletableFuture<GameProfile> future = Keys.getGame().getServer().getGameProfileManager().get(master.getUserId());
+                future.thenAccept((profile) -> {
+                    player.sendMessage(Format.message("This block is locked by ", TextColors.LIGHT_PURPLE, profile.getName()));
+                });
+            }
+        }
     }
 }
