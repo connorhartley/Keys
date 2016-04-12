@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import com.helion3.keys.locks.Lock;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -47,6 +48,11 @@ import org.spongepowered.api.world.World;
 public class InteractBlockListener {
     @Listener
     public void onUse(final InteractBlockEvent.Secondary event, @First Player player) {
+        // Ignore clicks in the air
+        if (event.getTargetBlock().equals(BlockSnapshot.NONE)) {
+            return;
+        }
+
         try {
             if (!player.hasPermission("keys.mod") && !Keys.getStorageAdapter().allowsAccess(player, event.getTargetBlock().getLocation().get())) {
                 player.sendMessage(Format.error("You may not interact with this locked location."));
@@ -62,6 +68,11 @@ public class InteractBlockListener {
 
     @Listener
     public void onPunchBlock(final InteractBlockEvent.Primary event, @First Player player) {
+        // Ignore clicks in the air
+        if (event.getTargetBlock().equals(BlockSnapshot.NONE)) {
+            return;
+        }
+
         Optional<InteractionHandler> optional = Keys.getInteractionHandler(player);
         if (!optional.isPresent()) {
             return;
