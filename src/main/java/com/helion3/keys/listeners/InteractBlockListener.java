@@ -49,7 +49,7 @@ public class InteractBlockListener {
     @Listener
     public void onUse(final InteractBlockEvent.Secondary event, @First Player player) {
         // Ignore clicks in the air
-        if (event.getTargetBlock().equals(BlockSnapshot.NONE)) {
+        if (event.getTargetBlock().equals(BlockSnapshot.NONE) || !event.getTargetBlock().getLocation().isPresent()) {
             return;
         }
 
@@ -69,7 +69,7 @@ public class InteractBlockListener {
     @Listener
     public void onPunchBlock(final InteractBlockEvent.Primary event, @First Player player) {
         // Ignore clicks in the air
-        if (event.getTargetBlock().equals(BlockSnapshot.NONE)) {
+        if (event.getTargetBlock().equals(BlockSnapshot.NONE) || !event.getTargetBlock().getLocation().isPresent()) {
             return;
         }
 
