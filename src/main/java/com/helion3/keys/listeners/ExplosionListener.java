@@ -33,18 +33,20 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.world.ExplosionEvent;
 
 import com.helion3.keys.Keys;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 public class ExplosionListener {
     @Listener
     public void onExplosion(final ExplosionEvent.Detonate event) {
         Optional<Entity> optional = event.getCause().first(Entity.class);
         if (optional.isPresent()) {
-            for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
-                if (Keys.getLockableBlocks().contains(transaction.getFinal().getState().getType())) {
+            for (Location<World> location : event.getAffectedLocations()) {
+                if (Keys.getLockableBlocks().contains(location.getBlockType())) {
                     try {
                         // Are there locks on this block?
-                        if (!Keys.getStorageAdapter().getLocks(transaction.getOriginal().getLocation().get()).isEmpty()) {
-                            transaction.setValid(false);
+                        if (!Keys.getStorageAdapter().getLocks(location).isEmpty()) {
+                            event.setCancelled(true);
                         }
                     } catch (SQLException e) {
                         e.printStackTrace();
