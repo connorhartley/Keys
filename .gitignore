@@ -1,6 +1,5 @@
 *.iml
 .gradle
-gradle
 
 # Numerous always-ignore extensions
 *.diff
@@ -55,8 +54,3 @@ manifest.mf
 
 # Mac filesystem dust
 .DS_Store
-
-# Other Libraries
-*.jar
-
-
