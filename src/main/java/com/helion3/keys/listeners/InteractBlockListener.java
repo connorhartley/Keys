@@ -94,7 +94,7 @@ public class InteractBlockListener {
 
                 CompletableFuture<GameProfile> future = Keys.getGame().getServer().getGameProfileManager().get(master.getUserId());
                 future.thenAccept((profile) -> {
-                    player.sendMessage(Format.message("This block is locked by ", TextColors.LIGHT_PURPLE, profile.getName()));
+                    player.sendMessage(Format.message("This block is locked by ", TextColors.LIGHT_PURPLE, profile.getName().orElse(profile.getUniqueId().toString())));
                 });
             }
         }
