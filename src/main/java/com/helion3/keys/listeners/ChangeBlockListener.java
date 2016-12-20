@@ -82,6 +82,9 @@ public class ChangeBlockListener {
                 if (!handleBreak(player, transaction, transaction.getOriginal(), true)) {
                     // Block above
                     handleBreak(player, transaction, transaction.getOriginal().getLocation().get().getRelative(Direction.UP).createSnapshot(), false);
+
+                    // Block infront
+                    handleBreak(player, transaction, transaction.getOriginal().getLocation().get().getRelative(Direction.NORTH).createSnapshot(), false);
                 }
             }
         }
